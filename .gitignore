@@ -1,0 +1,26 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments (if any created here)
+.env
+.venv
+env/
+venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Airflow logs if you ever run from here
+logs/
+
+# Ignore generated data outputs
+data/
+
+# System/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
