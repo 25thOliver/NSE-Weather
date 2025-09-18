@@ -24,3 +24,6 @@ data/
 Thumbs.db
 .vscode/
 .idea/
+
+# Large csv files
+.csv

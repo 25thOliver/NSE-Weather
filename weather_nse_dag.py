@@ -42,7 +42,7 @@ with DAG(
 		return {"started_at": datetime.utcnow().isoformat()}
 
 	@task
-	def fetch_weather_dummy():
+	def fetch_weather():
 		out_dir = os.path.join(BASE_PATH, "raw/weather")
 		os.makedirs(out_dir, exist_ok=True)
 		marker = os.path.join(out_dir, f"dummy_weather_{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}.json")
@@ -52,17 +52,17 @@ with DAG(
 		return marker
 
 	@task
-	def fetch_nse_dummy():
+	def fetch_kaggle():
 		out_dir = os.path.join(BASE_PATH, "raw/nse")
 		os.makedirs(out_dir, exist_ok=True)
-		marker = os.path.join(out_dir, f"dummy_nse_{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}.csv")
+		marker = os.path.join(out_dir, f"Kaggle_dataset{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}.csv")
 		with open(marker, "w") as fh:
 			fh.write("date,ticker,volume,close\n2025-09-17,TEST,1000,10.0\n")
 		logging.info("fetch_nse_dummy wrote %s", marker)
 		return marker
 
 	@task
-	def transform_dummy(weather_marker: str, nse_marker: str):
+	def transform(weather_marker: str, nse_marker: str):
 		out_dir = os.path.join(BASE_PATH, "processed/weather_nse")
 		os.makedirs(out_dir, exist_ok=True)
 		processed_file = os.path.join(out_dir, f"processed_{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}.csv")
@@ -72,24 +72,24 @@ with DAG(
 			fh.write("date,city,avg_temp,nse_volume\n")
 			fh.write(f"2025-09-17,Nairobi,---,1000\n")
 
-		logging.info("transform_dummy wrote %s (joined %s & %s)", processed_file, weather_marker, nse_marker)
+		logging.info("transform_data wrote %s (joined %s & %s)", processed_file, weather_marker, nse_marker)
 		return processed_file
 
 	@task
-	def load_dummy(processed_marker: str):
+	def load_data(processed_marker: str):
 		out_dir = os.path.join(BASE_PATH, "analytics")
 		os.makedirs(out_dir, exist_ok=True)
 		dest = os.path.join(out_dir, os.path.basename(processed_marker))
 		shutil.copy(processed_marker, dest)
-		logging.info(("load_dummy copied %s to %s", processed_marker, dest))
+		logging.info(("load_data copied %s to %s", processed_marker, dest))
 		return dest
 
 	# DAG topology
 	start_task = start()
-	weather_task = fetch_weather_dummy()
-	nse_task = fetch_nse_dummy()
-	processed_task =  transform_dummy(weather_task, nse_task)
-	loaded_task = load_dummy(processed_task)
+	weather_task = fetch_weather()
+	nse_task = fetch_kaggle()
+	processed_task =  transform(weather_task, nse_task)
+	loaded_task = load_data(processed_task)
 
 	start_task >> [weather_task, nse_task] >> processed_task >> loaded_task
 
