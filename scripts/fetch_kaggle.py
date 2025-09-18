@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 import pandas as pd
+import os
 
 logging.basicConfig(level=logging.INFO)
 
@@ -19,10 +20,13 @@ def clean_volume(x):
             return float(x)
     return float(x) if pd.notna(x) else 0.0
 
+# Point to the Dataset in the project folder
+project_folder = os.path.dirname(os.path.abspath(__file__))
+local_csv = os.path.join(project_folder, "south_africa_top40.csv")
+
 def fetch_kaggle():
     # Config
     bucket = "nse-weather"
-    local_csv = "South Africa Top 40 Historical Data.csv"
     s3_prefix = "raw/equities"
 
     # MinIO creds
