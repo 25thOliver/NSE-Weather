@@ -50,8 +50,20 @@ with DAG(
 		bash_command="python /home/oliver/airflow-tutorial/airflow/dags/nse_weather/scripts/transform_equities.py",
 	)
 
+	# Step 5: Load Weather into Postgres
+	load_weather = BashOperator(
+		task_id="load_weather",
+		bash_command="python /home/oliver/airflow-tutorial/airflow/dags/nse_weather/scripts/load_postgres.py --weather",
+	)
+
+	# Step 6: Load Equities into Postgres
+	load_equities = BashOperator(
+		task_id="load_equities",
+		bash_command="python /home/oliver/airflow-tutorial/airflow/dags/nse_weather/scripts/load_postgres.py --equities",
+	)
+
 	# Dependencies
-	fetch_weather >> transform_weather
-	fetch_kaggle >> transform_equities
+	fetch_weather >> transform_weather >> load_weather
+	fetch_kaggle >> transform_equities >> load_equities
 
 	
