@@ -1,18 +1,25 @@
 import logging
 import pandas as pd
 from sqlalchemy import create_engine
+import os
 
 logging.basicConfig(level=logging.INFO)
 
+# Load configs from environment variables
+MINIO_KEY = os.getenv("MINIO_ACCESS_KEY")
+MINIO_SECRET = os.getenv("MINIO_SECRET_KEYS")
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT")
+DATABASE = os.getenv("DATABASE")
+
 # MinIO storage options
 storage_options = {
-	"key": "MINIO_ACCESS_KEY",
-	"secret": "MINIO_SECRET_KEYS",
-	"client_kwargs": {"endpoint_url": "MINIO_ENDPOINT"},
+	"key": MINIO_KEY,
+	"secret": MINIO_SECRET,
+	"client_kwargs": {"endpoint_url": MINIO_ENDPOINT},
 }
 
 # Postgres connection string
-conn = "DATABASE"
+conn = DATABASE
 def load_weather():
 	df = pd.read_parquet(
 		"s3://nse-weather/staging/weather/2025-09-17.parquet",
