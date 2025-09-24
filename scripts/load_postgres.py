@@ -2,44 +2,43 @@ import logging
 import pandas as pd
 from sqlalchemy import create_engine
 import os
+from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+
+# Load environment variables from .env file
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "../.env"))
 
 # Load configs from environment variables
 MINIO_KEY = os.getenv("MINIO_ACCESS_KEY")
-MINIO_SECRET = os.getenv("MINIO_SECRET_KEYS")
+MINIO_SECRET = os.getenv("MINIO_SECRET_KEY")
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT")
 DATABASE = os.getenv("DATABASE")
 
 # MinIO storage options
 storage_options = {
-	"key": MINIO_KEY,
-	"secret": MINIO_SECRET,
-	"client_kwargs": {"endpoint_url": MINIO_ENDPOINT},
+    "key": MINIO_KEY,
+    "secret": MINIO_SECRET,
+    "client_kwargs": {"endpoint_url": MINIO_ENDPOINT},
 }
 
-# Postgres connection string
-conn = DATABASE
-def load_weather():
-	df = pd.read_parquet(
-		"s3://nse-weather/staging/weather/2025-09-17.parquet",
-		storage_options=storage_options,
-	)
+# Create SQLAlchemy engine for Postgres
+engine = create_engine(DATABASE)
 
-	engine = create_engine(conn)
-	df.to_sql("weather", engine, if_exists="append", index=False)
-	logging.info("Loaded weather data into Postgres")
+def load_to_postgres(table_name: str, s3_path: str):
+    logging.info(f"Reading data from {s3_path}...")
+    df = pd.read_parquet(s3_path, storage_options=storage_options, engine="pyarrow")
 
-def load_equities():
-	df = pd.read_parquet(
-		"s3://nse-weather/staging/equities/2025-09-17.parquet",
-		storage_options=storage_options,
-	)
+    logging.info(f"Loaded {len(df)} records from {s3_path}. Writing to Postgres table '{table_name}'...")
+    df.to_sql(table_name, engine, if_exists="replace", index=False)
+    
+    logging.info(f"Successfully loaded {len(df)} rows into '{table_name}'.")
 
-	engine = create_engine(conn)
-	df.to_sql("equities", engine, if_exists="append", index=False)
-	logging.info("Load equities data into Postgres")
+
+
+def main():
+    load_to_postgres("weather", "s3://nse-weather/staging/weather/2025-09-17.parquet")
+    load_to_postgres("equities", "s3://nse-weather/staging/equities/2025-09-17.parquet")
 
 if __name__ == "__main__":
-	load_weather()
-	load_equities()
+    main()

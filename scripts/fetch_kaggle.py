@@ -33,7 +33,7 @@ def fetch_kaggle():
     storage_options = {
         "key": "oliveradmin",
         "secret": "oliver#0L",
-        "client_kwargs": {"endpoint_url": "http://localhost:9000"},
+        "client_kwargs": {"endpoint_url": "http://172.17.0.1:9000"},
     }
 
     # Read CSV

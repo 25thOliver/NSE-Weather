@@ -13,7 +13,7 @@ def fetch_weather():
 	if not api_key:
 		raise ValueError("OPENWEATHER_API_KEY not set in environment")
 
-	endpoint_url = os.getenv("MINIO_ENDPOINT", "http://localhost:9000")
+	endpoint_url = os.getenv("MINIO_ENDPOINT", "http://172.17.0.1:9000")
 	minio_access_key = os.getenv("MINIO_ACCESS_KEY", "oliveradmin")
 	minio_secret_key = os.getenv("MINIO_SECRET_KEY", "oliver#0L")
 	bucket = os.getenv("MINIO_BUCKET", "nse-weather")

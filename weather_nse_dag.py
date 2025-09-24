@@ -29,38 +29,39 @@ with DAG(
 	# Step 1: Fetch Weather Data
 	fetch_weather = BashOperator(
 		task_id="fetch_weather",
-		bash_command="python /home/oliver/airflow-tutorial/airflow/dags/nse_weather/scripts/fetch_weather.py",
+		bash_command="python /opt/airflow/dags/nse_weather/scripts/fetch_weather.py",
 	)
 
-	# Step 2: Fetch Equities Data(from Kaggle CSV for now)
+	# Step 2: Fetch Equities Data (from Kaggle CSV for now)
 	fetch_kaggle = BashOperator(
 		task_id="fetch_kaggle",
-		bash_command="python /home/oliver/airflow-tutorial/airflow/dags/nse_weather/scripts/fetch_kaggle.py",
+		bash_command="python /opt/airflow/dags/nse_weather/scripts/fetch_kaggle.py",
 	)
 
-	# Step 3: Transformation Weather  --> staging parquet
-	transform_weather =  BashOperator(
+	# Step 3: Transformation Weather --> staging parquet
+	transform_weather = BashOperator(
 		task_id="transform_weather",
-		bash_command="python /home/oliver/airflow-tutorial/airflow/dags/nse_weather/scripts/transform_weather.py",
+		bash_command="python /opt/airflow/dags/nse_weather/scripts/transform_weather.py",
 	)
 
-	# Step 4: Transform Equities CSV --> staiging parquet
+	# Step 4: Transform Equities CSV --> staging parquet
 	transform_equities = BashOperator(
 		task_id="transform_equities",
-		bash_command="python /home/oliver/airflow-tutorial/airflow/dags/nse_weather/scripts/transform_equities.py",
+		bash_command="python /opt/airflow/dags/nse_weather/scripts/transform_equities.py",
 	)
 
 	# Step 5: Load Weather into Postgres
 	load_weather = BashOperator(
 		task_id="load_weather",
-		bash_command="python /home/oliver/airflow-tutorial/airflow/dags/nse_weather/scripts/load_postgres.py --weather",
+		bash_command="python /opt/airflow/dags/nse_weather/scripts/load_postgres.py --weather",
 	)
 
 	# Step 6: Load Equities into Postgres
 	load_equities = BashOperator(
 		task_id="load_equities",
-		bash_command="python /home/oliver/airflow-tutorial/airflow/dags/nse_weather/scripts/load_postgres.py --equities",
+		bash_command="python /opt/airflow/dags/nse_weather/scripts/load_postgres.py --equities",
 	)
+
 
 	# Dependencies
 	fetch_weather >> transform_weather >> load_weather
